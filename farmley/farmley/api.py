@@ -6,10 +6,24 @@ import frappe
 
 
 @frappe.whitelist()
-def product_details_for_website(productCategory="", productName=""):
+def product_details_for_website(productId=None, productCategory=None, productName=None, source=None):
+    """
+    param:productId, productCategory, productName, source
+    return: products_json
+    #  This api will return the website_product views details
+    """
     sql_query = "select name,product_code,product_name,product_category,packaging_size, selling_rate,media_url, " \
-                "hsn_code, barcode from website_products where product_category like \'%{}%\' and name like \'%{}%\'".format(
-        productCategory, productName)
+                "hsn_code, barcode from website_products"
+    where = " Where "
+    _and = " and "
+    sql_query = sql_query + where + "name = '{}'".format(productId) if productId is not None else sql_query
+    if productId is not None:
+        sql_query = sql_query + _and +"product_category like \'%{}%\'".format(productCategory) if productCategory is not None else sql_query
+        sql_query = sql_query + _and +"product_name like \'%{}%\'".format(productName) if productName is not None else sql_query
+    elif productCategory is not None:
+        sql_query = sql_query + where +"product_category like \'%{}%\'".format(productCategory) +_and +"product_name like \'%{}%\'".format(productName) if productName is not None else sql_query +where +"product_category like \'%{}%\'".format(productCategory)
+    else:
+        sql_query = sql_query +where+ "product_name like \'%{}%\'".format(productName) if productName is not None else sql_query
 
     db_data = frappe.db.sql(sql_query)
     products_json = []
@@ -25,7 +39,68 @@ def product_details_for_website(productCategory="", productName=""):
         d['hsnCode'] = row[7]
         d['barcode'] = row[8]
         products_json.append(d)
-    return products_json
+    return sql_query, products_json
+
+
+@frappe.whitelist()
+def open_product_category(source=None):
+    """
+        param:source
+        return:product_category
+        # it will return the distinct product category to filter on frontend
+    """
+    sql_query = "select DISTINCT (product_category) from `_a94a8fe5ccb19ba6`.website_products"
+    if source is not None:
+        sql_query = "select DISTINCT (product_category) from `_a94a8fe5ccb19ba6`.website_products where price_list " \
+                    "like \'%{}%\'".format(source)
+    db_data = frappe.db.sql(sql_query)
+    product_category_json = []
+    for row in db_data:
+        d = collections.OrderedDict()
+        d['product_category'] = row[0]
+        product_category_json.append(d)
+    return product_category_json
+
+
+@frappe.whitelist()
+def customer_addresses(phoneNumber=None, emailId=None, customerCode=None):
+    """
+    param: phoneNumber,emailId,customerCode
+    return:addresses
+    # this api will return all the addresses belong to that customer
+    """
+    sql_query = "select address_title, name, city, state, country, pincode, address_line1, address_line2 " \
+                "from `_a94a8fe5ccb19ba6`.tabAddress "
+    where = " where "
+    _and = " and "
+    if phoneNumber is not None or emailId is not None or customerCode is not None:
+        if phoneNumber is not None:
+            sql_query = sql_query + where + "phone =" + phoneNumber
+        elif customerCode is not None:
+            sql_query = sql_query + where + "name = " + customerCode
+        elif emailId is not None:
+            sql_query = sql_query + where + "email_id = " + "\'{}\'".format(emailId)
+    print(sql_query)
+    addresses = frappe.db.sql(sql_query)
+    addresses_json = []
+    for row in addresses:
+        d = collections.OrderedDict()
+        d['label'] = row[0]
+        d['address_code'] = row[1]
+        # d['organization_code'] = row[2]
+        d['city_name'] = row[2]
+        d['state_name'] = row[3]
+        d['country_name'] = row[4]
+        d['pincode'] = row[5]
+        # d['contact_name'] = row[7]
+        # d['contact_number'] = row[8]
+        d['line_1'] = row[6]
+        d['line_2'] = row[7]
+        # d['locality'] = row[11]
+        addresses_json.append(d)
+    return addresses_json
+
+    return addresses
 
 
 @frappe.whitelist()
@@ -56,7 +131,3 @@ def save_orders(customer, customerAddress, transactionDate, itemCode, itemName, 
     tag_response = requests.post(url=tag_url, data=json.dumps(tag_payload), headers=headers)
     tag_json_data = json.loads(tag_response.content.decode('utf-8'))
     return save_orders_json_data, tag_json_data
-
-
-
-
