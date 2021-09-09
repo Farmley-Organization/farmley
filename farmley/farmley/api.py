@@ -17,13 +17,14 @@ def product_details_for_website(productId=None, productCategory=None, productNam
     where = " Where "
     _and = " and "
     sql_query = sql_query + where + "name = '{}'".format(productId) if productId is not None else sql_query
-    if productId is not None:
-        sql_query = sql_query + _and +"product_category like \'%{}%\'".format(productCategory) if productCategory is not None else sql_query
-        sql_query = sql_query + _and +"product_name like \'%{}%\'".format(productName) if productName is not None else sql_query
-    elif productCategory is not None:
-        sql_query = sql_query + where +"product_category like \'%{}%\'".format(productCategory) +_and +"product_name like \'%{}%\'".format(productName) if productName is not None else sql_query +where +"product_category like \'%{}%\'".format(productCategory)
-    else:
-        sql_query = sql_query +where+ "product_name like \'%{}%\'".format(productName) if productName is not None else sql_query
+    if productCategory is not None and productId is None:
+        sql_query = sql_query + where + "product_category like \'%{}%\'".format(
+            productCategory) + _and + "product_name like \'%{}%\'".format(
+            productName) if productName is not None else sql_query + where + "product_category like \'%{}%\'".format(
+            productCategory)
+    elif productCategory is None and productId is None:
+        sql_query = sql_query + where + "product_name like \'%{}%\'".format(
+            productName) if productName is not None else sql_query
 
     db_data = frappe.db.sql(sql_query)
     products_json = []
