@@ -1,8 +1,6 @@
 from __future__ import unicode_literals
 import collections
 import json
-import logging
-
 import requests
 import frappe
 
@@ -19,9 +17,12 @@ def product_details_for_website(name=None, productCategoryName=None, productName
     where = " where "
     _and = " and "
 
-    if name is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "name = \'{}\'".format(name)
-    if productCategoryName is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "product_category like \'%{}%\'".format(productCategoryName)
-    if productName is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "product_name like \'%{}%\'".format(productName)
+    if name is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "name = \'{}\'".format(
+        name)
+    if productCategoryName is not None: sql_query = sql_query + (
+        _and if "where" in sql_query else where) + "product_category like \'%{}%\'".format(productCategoryName)
+    if productName is not None: sql_query = sql_query + (
+        _and if "where" in sql_query else where) + "product_name like \'%{}%\'".format(productName)
 
     db_data = frappe.db.sql(sql_query)
     products_json = []
@@ -42,6 +43,27 @@ def product_details_for_website(name=None, productCategoryName=None, productName
 
 
 @frappe.whitelist()
+def parent_product():
+    """
+        param:
+        return:parent_product
+    """
+    sql_query = "select DISTINCT (parent_product) from website_products"
+    # _and = " and "
+    where = " where "
+    # if source is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "price_list like \'%{}%\'".format(source)
+    # db_data = frappe.db.sql(sql_query)
+    # product_category_json = []
+    # for row in db_data:
+    #     d = collections.OrderedDict()
+    #     d['productCategory'] = row[0]
+    #     product_category_json.append(d)
+    f = frappe.db.get_all(doctype="Item Price", filters=[["Item Price", "price_list", "=", "Website Price List"]],
+                          fields=["price_list_rate"])
+    return f
+
+
+@frappe.whitelist()
 def open_product_category(source=None):
     """
         param:source
@@ -51,7 +73,8 @@ def open_product_category(source=None):
     sql_query = "select DISTINCT (product_category) from website_products"
     _and = " and "
     where = " where "
-    if source is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "price_list like \'%{}%\'".format(source)
+    if source is not None: sql_query = sql_query + (
+        _and if "where" in sql_query else where) + "price_list like \'%{}%\'".format(source)
     db_data = frappe.db.sql(sql_query)
     product_category_json = []
     for row in db_data:
@@ -62,19 +85,22 @@ def open_product_category(source=None):
 
 
 @frappe.whitelist()
-def customer_addresses(phoneNumber=None, emailId=None, customerCode=None):
+def customer_addresses(phoneNumber=None, emailId=None, name=None):
     """
     param: phoneNumber,emailId,customerCode
     return:addresses
     # this api will return all the addresses belong to that customer
     """
-    sql_query = "select address_title, name, city, state, country, pincode, contact_name, contact_number, address_line1, address_line2, locality " \
-                "from tabAddress "
+    sql_query = "select address_title, name, city, state, country, pincode, contact_name, contact_number, " \
+                "address_line1, address_line2, locality from tabAddress "
     where = " where "
     _and = " and "
-    if phoneNumber is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "phone = \'{}\'".format(phoneNumber)
-    if customerCode is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "name = \'{}\'".format(customerCode)
-    if emailId is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "email_id = \'{}\'".format(emailId)
+    if phoneNumber is not None: sql_query = sql_query + (
+        _and if "where" in sql_query else where) + "phone = \'{}\'".format(phoneNumber)
+    if name is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "name = \'{}\'".format(
+        name)
+    if emailId is not None: sql_query = sql_query + (
+        _and if "where" in sql_query else where) + "email_id = \'{}\'".format(emailId)
     addresses = frappe.db.sql(sql_query)
     addresses_json = []
     for row in addresses:
