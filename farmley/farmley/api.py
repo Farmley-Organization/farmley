@@ -70,17 +70,14 @@ def customer_addresses(phoneNumber=None, emailId=None, customerCode=None):
     return:addresses
     # this api will return all the addresses belong to that customer
     """
-    sql_query = "select address_title, name, city, state, country, pincode, address_line1, address_line2 " \
+    sql_query = "select address_title, name, city, state, country, pincode, contact_name, contact_number, address_line1, address_line2, locality " \
                 "from `_a94a8fe5ccb19ba6`.tabAddress "
     where = " where "
     _and = " and "
     if phoneNumber is not None or emailId is not None or customerCode is not None:
-        if phoneNumber is not None:
-            sql_query = sql_query + where + "phone =" + phoneNumber
-        elif customerCode is not None:
-            sql_query = sql_query + where + "name = " + customerCode
-        elif emailId is not None:
-            sql_query = sql_query + where + "email_id = " + "\'{}\'".format(emailId)
+        sql_query = sql_query + where + "phone =" + phoneNumber if phoneNumber is not None else sql_query
+        sql_query = sql_query + where + "name = " + customerCode if phoneNumber is None and customerCode is not None else sql_query
+        sql_query = sql_query + where + "email_id = " + "\'{}\'".format(emailId) if emailId is not None and phoneNumber is None and customerCode is None else sql_query
     print(sql_query)
     addresses = frappe.db.sql(sql_query)
     addresses_json = []
@@ -93,15 +90,13 @@ def customer_addresses(phoneNumber=None, emailId=None, customerCode=None):
         d['state_name'] = row[3]
         d['country_name'] = row[4]
         d['pincode'] = row[5]
-        # d['contact_name'] = row[7]
-        # d['contact_number'] = row[8]
-        d['line_1'] = row[6]
-        d['line_2'] = row[7]
-        # d['locality'] = row[11]
+        d['contact_name'] = row[6]
+        d['contact_number'] = row[7]
+        d['line_1'] = row[8]
+        d['line_2'] = row[9]
+        d['locality'] = row[10]
         addresses_json.append(d)
     return addresses_json
-
-    return addresses
 
 
 @frappe.whitelist()
