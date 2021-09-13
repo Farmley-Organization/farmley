@@ -3,6 +3,7 @@ import collections
 import json
 import requests
 import frappe
+from operator import itemgetter
 
 
 @frappe.whitelist()
@@ -12,11 +13,11 @@ def product_details_for_website(name=None, productCategoryName=None, productName
     return: products_json
     #  This api will return the website_product views details
     """
-    sql_query = "select name,product_code,product_name,product_category,packaging_size, selling_rate,media_url, " \
-                "hsn_code, barcode,parent_product_media_url from website_products"
+    sql_query = "select name,product_code,product_name,product_category,packaging_size,media_url, " \
+                "hsn_code, barcode,parent_product_media_url,`Standard Buying`,`Website MRP List`," \
+                "`Website Price list`,`B2B Price List`,`Standard Selling` from website_products "
     where = " where "
     _and = " and "
-
     if name is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "name = \'{}\'".format(
         name)
     if productCategoryName is not None: sql_query = sql_query + (
@@ -33,34 +34,57 @@ def product_details_for_website(name=None, productCategoryName=None, productName
         d['productName'] = row[2]
         d['productCategory'] = row[3]
         d['packagingSize'] = row[4]
-        d['sellingRate'] = row[5]
-        d['mediaUrl'] = row[6]
-        d['hsnCode'] = row[7]
-        d['barcode'] = row[8]
-        d['parentProductMediaUrl'] = row[9]
+        d['mediaUrl'] = row[5]
+        d['hsnCode'] = row[6]
+        d['barcode'] = row[7]
+        d['parentProductMediaUrl'] = row[8]
+        d['standardBuying'] = row[9]
+        d['WebsiteMRPList'] = row[10]
+        d["websitePriceList"] = row[11]
+        d['B2BPriceList'] = row[12]
+        d['standardSelling'] = row[13]
         products_json.append(d)
     return products_json
 
 
 @frappe.whitelist()
-def parent_product():
+def featured_product(source=None):
     """
         param:
         return:parent_product
     """
-    sql_query = "select DISTINCT (parent_product) from website_products"
-    # _and = " and "
+
+    featured_product_name = frappe.db.get_all(doctype="Item",
+                                              filters=[["Item", "_user_tags", "LIKE", '%' + source + '%']],
+                                              fields=["`tabItem`.name"])
+    sql_query = "select name,product_code,product_name,product_category,packaging_size,media_url, " \
+                "hsn_code, barcode,parent_product_media_url,`Standard Buying`,`Website MRP List`," \
+                "`Website Price list`,`B2B Price List`,`Standard Selling` from website_products "
     where = " where "
-    # if source is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "price_list like \'%{}%\'".format(source)
-    # db_data = frappe.db.sql(sql_query)
-    # product_category_json = []
-    # for row in db_data:
-    #     d = collections.OrderedDict()
-    #     d['productCategory'] = row[0]
-    #     product_category_json.append(d)
-    f = frappe.db.get_all(doctype="Item Price", filters=[["Item Price", "price_list", "=", "Website Price List"]],
-                          fields=["price_list_rate"])
-    return f
+    list_of_name = list(map(itemgetter('name'), featured_product_name))
+
+    sql_query = sql_query + where + " name in " + str(tuple(list_of_name))
+    db_featured_product_details = frappe.db.sql(sql_query)
+    featured_products_json = []
+    for row in db_featured_product_details:
+        d = collections.OrderedDict()
+        d['name'] = row[0]
+        d['productCode'] = row[1]
+        d['productName'] = row[2]
+        d['productCategory'] = row[3]
+        d['packagingSize'] = row[4]
+        d['mediaUrl'] = row[5]
+        d['hsnCode'] = row[6]
+        d['barcode'] = row[7]
+        d['parentProductMediaUrl'] = row[8]
+        d['standardBuying'] = row[9]
+        d['WebsiteMRPList'] = row[10]
+        d["websitePriceList"] = row[11]
+        d['B2BPriceList'] = row[12]
+        d['standardSelling'] = row[13]
+        featured_products_json.append(d)
+
+    return featured_products_json
 
 
 @frappe.whitelist()
