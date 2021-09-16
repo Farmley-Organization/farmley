@@ -5,6 +5,20 @@ import requests
 import frappe
 from operator import itemgetter
 
+@frappe.whitelist()
+def parent_product_details():
+    sql_query = "select parent_product_name, product_code_erpnext, rate, product_category,parent_product_media from `_a94a8fe5ccb19ba6`.parent_product_details"
+    parent_product_list = frappe.db.sql(sql_query)
+    parent_product_json = []
+    for row in parent_product_list:
+        d = collections.OrderedDict()
+        d['parent_product_name'] = row[0]
+        d['product_code_erpnext'] = row[1]
+        d['rate'] = row[2]
+        d['product_category'] = row[3]
+        d['parent_product_media'] = row[4]
+        parent_product_json.append(d)
+    return parent_product_json
 
 @frappe.whitelist()
 def product_details_for_website(name=None, productCategoryName=None, productName=None):
@@ -15,7 +29,7 @@ def product_details_for_website(name=None, productCategoryName=None, productName
     """
     sql_query = "select name,product_code,product_name,product_category,packaging_size,media_url, " \
                 "hsn_code, barcode,parent_product_media_url,`Standard Buying`,`Website MRP List`," \
-                "`Website Price list`,`B2B Price List`,`Standard Selling` from website_products "
+                "`Website Price list`,`B2B Price List`,`Standard Selling` from product_details "
     where = " where "
     _and = " and "
     if name is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "name = \'{}\'".format(
@@ -24,6 +38,8 @@ def product_details_for_website(name=None, productCategoryName=None, productName
         _and if "where" in sql_query else where) + "product_category like \'%{}%\'".format(productCategoryName)
     if productName is not None: sql_query = sql_query + (
         _and if "where" in sql_query else where) + "product_name like \'%{}%\'".format(productName)
+    # if isParentProduct is True: sql_query = sql_query + (_and if "where" in sql_query else where) + " variant_of IS NULL "
+    # if isParentProduct is False: sql_query = sql_query + (_and if "where" in sql_query else where) + " variant_of IS NOT NULL "
 
     db_data = frappe.db.sql(sql_query)
     products_json = []
@@ -48,18 +64,18 @@ def product_details_for_website(name=None, productCategoryName=None, productName
 
 
 @frappe.whitelist()
-def featured_product(source=None):
+def featured_product(tagName):
     """
         param:
         return:parent_product
     """
 
     featured_product_name = frappe.db.get_all(doctype="Item",
-                                              filters=[["Item", "_user_tags", "LIKE", '%' + source + '%']],
+                                              filters=[["Item", "_user_tags", "LIKE", '%' + tagName + '%']],
                                               fields=["`tabItem`.name"])
     sql_query = "select name,product_code,product_name,product_category,packaging_size,media_url, " \
                 "hsn_code, barcode,parent_product_media_url,`Standard Buying`,`Website MRP List`," \
-                "`Website Price list`,`B2B Price List`,`Standard Selling` from website_products "
+                "`Website Price list`,`B2B Price List`,`Standard Selling` from product_details "
     where = " where "
     list_of_name = list(map(itemgetter('name'), featured_product_name))
 
@@ -94,7 +110,7 @@ def open_product_category(source=None):
         return:product_category
         # it will return the distinct product category to filter on frontend
     """
-    sql_query = "select DISTINCT (product_category) from website_products"
+    sql_query = "select DISTINCT (product_category) from product_details"
     _and = " and "
     where = " where "
     if source is not None: sql_query = sql_query + (
