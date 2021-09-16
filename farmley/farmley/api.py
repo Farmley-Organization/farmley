@@ -7,7 +7,7 @@ from operator import itemgetter
 
 @frappe.whitelist()
 def parent_product_details():
-    sql_query = "select parent_product_name, product_code_erpnext, rate, product_category,parent_product_media from `_a94a8fe5ccb19ba6`.parent_product_details"
+    sql_query = "select parent_product_name, product_code_erpnext, rate, product_category,parent_product_media from parent_product_details"
     parent_product_list = frappe.db.sql(sql_query)
     parent_product_json = []
     for row in parent_product_list:
