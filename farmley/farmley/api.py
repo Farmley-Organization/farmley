@@ -7,16 +7,18 @@ from operator import itemgetter
 
 @frappe.whitelist()
 def parent_product_details():
-    sql_query = "select parent_product_name, product_code_erpnext, rate, product_category,parent_product_media from parent_product_details"
+    sql_query = "select parent_product_name, product_code_erpnext, rate, product_category,parent_product_media,uuid,slug from parent_product_details"
     parent_product_list = frappe.db.sql(sql_query)
     parent_product_json = []
     for row in parent_product_list:
         d = collections.OrderedDict()
-        d['parent_product_name'] = row[0]
-        d['product_code_erpnext'] = row[1]
+        d['parentProductName'] = row[0]
+        d['productCodeErpnext'] = row[1]
         d['rate'] = row[2]
-        d['product_category'] = row[3]
-        d['parent_product_media'] = row[4]
+        d['productCategory'] = row[3]
+        d['parentProductMedia'] = row[4]
+        d['uuid'] = row[5]
+        d['slug'] = row[6]
         parent_product_json.append(d)
     return parent_product_json
 
@@ -29,7 +31,7 @@ def product_details_for_website(name=None, productCategoryName=None, productName
     """
     sql_query = "select name,product_code,product_name,product_category,packaging_size,media_url, " \
                 "hsn_code, barcode,parent_product_media_url,`Standard Buying`,`Website MRP List`," \
-                "`Website Price list`,`B2B Price List`,`Standard Selling` from product_details "
+                "`Website Price list`,`B2B Price List`,`Standard Selling`,uuid,slug from product_details "
     where = " where "
     _and = " and "
     if name is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "name = \'{}\'".format(
@@ -59,6 +61,8 @@ def product_details_for_website(name=None, productCategoryName=None, productName
         d["websitePriceList"] = row[11]
         d['B2BPriceList'] = row[12]
         d['standardSelling'] = row[13]
+        d['uuid'] = row[14]
+        d['slug'] = row[15]
         products_json.append(d)
     return products_json
 
@@ -75,7 +79,7 @@ def featured_product(tagName):
                                               fields=["`tabItem`.name"])
     sql_query = "select name,product_code,product_name,product_category,packaging_size,media_url, " \
                 "hsn_code, barcode,parent_product_media_url,`Standard Buying`,`Website MRP List`," \
-                "`Website Price list`,`B2B Price List`,`Standard Selling` from product_details "
+                "`Website Price list`,`B2B Price List`,`Standard Selling`,uuid,slug from product_details "
     where = " where "
     list_of_name = list(map(itemgetter('name'), featured_product_name))
 
@@ -98,6 +102,8 @@ def featured_product(tagName):
         d["websitePriceList"] = row[11]
         d['B2BPriceList'] = row[12]
         d['standardSelling'] = row[13]
+        d['uuid'] = row[14]
+        d['slug'] = row[15]
         featured_products_json.append(d)
 
     return featured_products_json
