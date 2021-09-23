@@ -7,6 +7,8 @@ from boto3.docs import action
 import frappe
 from operator import itemgetter
 
+from frappe.geo import doctype
+
 
 @frappe.whitelist()
 def parent_product_details():
@@ -171,7 +173,7 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
 
 
 @frappe.whitelist()
-def add_to_cart(payload,source,name):
+def add_to_cart(payload, source, name):
     headers = {"Authorization": "Token 9e820d1621292f3:e40525854287561",
                "Accept": "application/json",
                "Content-Type": "application/json",
@@ -194,14 +196,14 @@ def add_to_cart(payload,source,name):
 
 
 @frappe.whitelist()
-def save_orders(order_name):
+def save_orders(name):
     headers = {"Authorization": "Token 9e820d1621292f3:e40525854287561",
                "Accept": "apcustomerAddress, transactionDate, itemCode, itemName, deliveryDate, qty, rate,plication/json",
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
                }
 
-    url = "http://localhost:8000/api/resource/Sales Order/{}".format(order_name)
+    url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
 
     payload = {
         "order_type": "Sales",
@@ -212,3 +214,36 @@ def save_orders(order_name):
     save_orders_response_data = json.loads(save_orders_response.content.decode('utf-8'))
 
     return save_orders_response_data
+
+
+@frappe.whitelist()
+def cart_items(customerName,source=None):
+    cart_items_list = frappe.db.get_all(doctype="Sales Order",
+                                        fields=["`tabSales Order`.`name`", "`tabSales Order`.`owner`",
+                                                "`tabSales Order`.`creation`", "`tabSales Order`.`modified`",
+                                                "`tabSales Order`.`modified_by`", "`tabSales Order`.`_user_tags`",
+                                                "`tabSales Order`.`_comments`", "`tabSales Order`.`_assign`",
+                                                "`tabSales Order`.`_liked_by`", "`tabSales Order`.`docstatus`",
+                                                "`tabSales Order`.`parent`", "`tabSales Order`.`parenttype`",
+                                                "`tabSales Order`.`parentfield`", "`tabSales Order`.`idx`",
+                                                "`tabSales Order`.`delivery_date`", "`tabSales Order`.`total`",
+                                                "`tabSales Order`.`net_total`",
+                                                "`tabSales Order`.`total_taxes_and_charges`",
+                                                "`tabSales Order`.`discount_amount`", "`tabSales Order`.`grand_total`",
+                                                "`tabSales Order`.`rounding_adjustment`",
+                                                "`tabSales Order`.`rounded_total`", "`tabSales Order`.`advance_paid`",
+                                                "`tabSales Order`.`status`", "`tabSales Order`.`per_delivered`",
+                                                "`tabSales Order`.`per_billed`", "`tabSales Order`.`customer_name`",
+                                                "`tabSales Order`.`base_grand_total`", "`tabSales Order`.`currency`",
+                                                "`tabSales Order`.`order_type`",
+                                                "`tabSales Order`.`skip_delivery_note`", "`tabSales Order`.`_seen`",
+                                                "`tabSales Order`.`party_account_currency`"],
+                                        filters= [["Sales Order", "docstatus", "=", "0"],
+                                                  ["Sales Order", "customer_name", "=", customerName],["Sales Order", "company", "=", "Farmley"]],
+                                        order_by="`tabSales Order`.`modified` desc",
+                                        start=0,
+                                        # page_length: 20
+                                        # view="List",
+                                        with_comment_count=True)
+    # print(customerName)
+    return cart_items_list
