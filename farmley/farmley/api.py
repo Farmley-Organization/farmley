@@ -239,7 +239,9 @@ def cart_items(customerName,source=None):
                                                 "`tabSales Order`.`skip_delivery_note`", "`tabSales Order`.`_seen`",
                                                 "`tabSales Order`.`party_account_currency`"],
                                         filters= [["Sales Order", "docstatus", "=", "0"],
-                                                  ["Sales Order", "customer_name", "=", customerName],["Sales Order", "company", "=", "Farmley"]],
+                                                  ["Sales Order", "customer_name", "=", customerName],
+                                                  ["Sales Order", "company", "=", "Farmley"],
+                                                  ["Sales Order","order_type","=","Shopping Cart"]],
                                         order_by="`tabSales Order`.`modified` desc",
                                         start=0,
                                         # page_length: 20
