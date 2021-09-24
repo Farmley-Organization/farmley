@@ -196,7 +196,7 @@ def add_to_cart(payload, source, name):
 
 
 @frappe.whitelist()
-def save_orders(name):
+def save_order(name):
     headers = {"Authorization": "Token 9e820d1621292f3:e40525854287561",
                "Accept": "apcustomerAddress, transactionDate, itemCode, itemName, deliveryDate, qty, rate,plication/json",
                "Content-Type": "application/json",
@@ -243,9 +243,6 @@ def cart_items(customerName,source=None):
                                                   ["Sales Order", "company", "=", "Farmley"],
                                                   ["Sales Order","order_type","=","Shopping Cart"]],
                                         order_by="`tabSales Order`.`modified` desc",
-                                        start=0,
-                                        # page_length: 20
-                                        # view="List",
+                                        start=0, page_length=1,
                                         with_comment_count=True)
-    # print(customerName)
     return cart_items_list
