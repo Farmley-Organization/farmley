@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 import collections
 import json
+import logging
+
 import requests
 from boto3.docs import action
 
@@ -245,4 +247,18 @@ def cart_items(customerName,source=None):
                                         order_by="`tabSales Order`.`modified` desc",
                                         start=0, page_length=1,
                                         with_comment_count=True)
-    return cart_items_list
+    headers = {"Authorization": "Token 9e820d1621292f3:e40525854287561",
+               "Accept": "apcustomerAddress, transactionDate, itemCode, itemName, deliveryDate, qty, rate,plication/json",
+               "Content-Type": "application/json",
+               "X-Frappe-CSRF-Token": frappe.generate_hash()
+               }
+    try:
+        name=cart_items_list[0]["name"]
+        url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
+
+        save_orders_response = requests.get(url=url, headers=headers)
+        cart_items_list_if_exist= json.loads(save_orders_response.content.decode('utf-8'))
+        # cart_items_list_if_exist = frappe.db.get_all(doctype = "Sales Order",filters = [["Sales Order", "name", "=", name]])
+    except:
+        print("Message")
+    return cart_items_list_if_exist
