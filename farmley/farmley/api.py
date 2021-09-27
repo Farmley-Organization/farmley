@@ -181,16 +181,19 @@ def add_to_cart(payload, source, name):
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()}
     if name is None:
-        url = "http://localhost:8000/api/resource/Sales Order"
+        # url = "http://localhost:8000/api/resource/Sales Order"
+        url = "http://dev-erp.farmley.com/api/resource/Sales Order"
         save_orders_response = requests.post(url=url, data=json.dumps(payload), headers=headers)
         save_orders_json_data = json.loads(save_orders_response.content.decode('utf-8'))
         # adding tag on order
-        tag_url = "http://localhost:8000/api/method/frappe.desk.doctype.tag.tag.add_tag"
+        # tag_url = "http://localhost:8000/api/method/frappe.desk.doctype.tag.tag.add_tag"
+        tag_url = "http://dev-erp.farmley.com/api/method/frappe.desk.doctype.tag.tag.add_tag"
         tag_payload = {"tag": source, "dt": "Sales Order", "dn": save_orders_json_data["data"]["name"]}
         tag_response = requests.post(url=tag_url, data=json.dumps(tag_payload), headers=headers)
         tag_json_data = json.loads(tag_response.content.decode('utf-8'))
     else:
-        put_url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
+        # put_url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
+        put_url = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
         save_orders_response = requests.put(url=put_url, data=json.dumps(payload), headers=headers)
         save_orders_json_data = json.loads(save_orders_response.content.decode('utf-8'))
 
@@ -205,7 +208,8 @@ def save_order(name):
                "X-Frappe-CSRF-Token": frappe.generate_hash()
                }
 
-    url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
+    # url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
+    url = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
 
     payload = {
         "order_type": "Sales",
@@ -220,6 +224,7 @@ def save_order(name):
 
 @frappe.whitelist()
 def cart_items(customerName,source=None):
+    global cart_items_list_if_exist
     cart_items_list = frappe.db.get_all(doctype="Sales Order",
                                         fields=["`tabSales Order`.`name`", "`tabSales Order`.`owner`",
                                                 "`tabSales Order`.`creation`", "`tabSales Order`.`modified`",
@@ -254,7 +259,8 @@ def cart_items(customerName,source=None):
                }
     try:
         name=cart_items_list[0]["name"]
-        url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
+        # url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
+        url = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
 
         save_orders_response = requests.get(url=url, headers=headers)
         cart_items_list_if_exist= json.loads(save_orders_response.content.decode('utf-8'))
