@@ -176,7 +176,7 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
 
 @frappe.whitelist()
 def add_to_cart(payload, source, name):
-    headers = {"Authorization": "Token 9e820d1621292f3:e40525854287561",
+    headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Accept": "application/json",
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()}
@@ -186,7 +186,7 @@ def add_to_cart(payload, source, name):
         save_orders_response = requests.post(url=url, data=json.dumps(payload), headers=headers)
         save_orders_json_data = json.loads(save_orders_response.content.decode('utf-8'))
         # adding tag on order
-        # tag_url = "http://localhost:8000/api/method/frappe.desk.doctype.tag.tag.add_tag"
+        tag_url = "http://localhost:8000/api/method/frappe.desk.doctype.tag.tag.add_tag"
         tag_url = "http://dev-erp.farmley.com/api/method/frappe.desk.doctype.tag.tag.add_tag"
         tag_payload = {"tag": source, "dt": "Sales Order", "dn": save_orders_json_data["data"]["name"]}
         tag_response = requests.post(url=tag_url, data=json.dumps(tag_payload), headers=headers)
@@ -202,7 +202,7 @@ def add_to_cart(payload, source, name):
 
 @frappe.whitelist()
 def save_order(name):
-    headers = {"Authorization": "Token 9e820d1621292f3:e40525854287561",
+    headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Accept": "apcustomerAddress, transactionDate, itemCode, itemName, deliveryDate, qty, rate,plication/json",
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
@@ -252,15 +252,15 @@ def cart_items(customerName,source=None):
                                         order_by="`tabSales Order`.`modified` desc",
                                         start=0, page_length=1,
                                         with_comment_count=True)
-    headers = {"Authorization": "Token 9e820d1621292f3:e40525854287561",
+    headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Accept": "apcustomerAddress, transactionDate, itemCode, itemName, deliveryDate, qty, rate,plication/json",
                "Content-Type": "application/json",
-               "X-Frappe-CSRF-Token": frappe.generate_hash()
+               # "X-Frappe-CSRF-Token": frappe.generate_hash()
                }
     try:
         name=cart_items_list[0]["name"]
-        # url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
-        url = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
+        url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
+        # url = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
 
         save_orders_response = requests.get(url=url, headers=headers)
         cart_items_list_if_exist= json.loads(save_orders_response.content.decode('utf-8'))
