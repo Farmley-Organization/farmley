@@ -48,6 +48,8 @@ def product_details(name=None, productCategoryName=None, productName=None):
         _and if "where" in sql_query else where) + "product_category like \'%{}%\'".format(productCategoryName)
     if productName is not None: sql_query = sql_query + (
         _and if "where" in sql_query else where) + "product_name like \'%{}%\'".format(productName)
+    # if isParentProduct is True: sql_query = sql_query + (_and if "where" in sql_query else where) + " variant_of IS NULL "
+    # if isParentProduct is False: sql_query = sql_query + (_and if "where" in sql_query else where) + " variant_of IS NOT NULL "
 
     db_data = frappe.db.sql(sql_query)
     products_json = []
@@ -186,7 +188,7 @@ def add_to_cart(payload, source, name):
         save_orders_response = requests.post(url=url, data=json.dumps(payload), headers=headers)
         save_orders_json_data = json.loads(save_orders_response.content.decode('utf-8'))
         # adding tag on order
-        # tag_url = "http://localhost:8000/api/method/frappe.desk.doctype.tag.tag.add_tag"
+        tag_url = "http://localhost:8000/api/method/frappe.desk.doctype.tag.tag.add_tag"
         tag_url = "http://dev-erp.farmley.com/api/method/frappe.desk.doctype.tag.tag.add_tag"
         tag_payload = {"tag": source, "dt": "Sales Order", "dn": save_orders_json_data["data"]["name"]}
         tag_response = requests.post(url=tag_url, data=json.dumps(tag_payload), headers=headers)
@@ -222,40 +224,11 @@ def save_order(name):
     return save_orders_response_data
 
 
-
 @frappe.whitelist()
 def cart_items(customerName, source=None):
     global cart_items_list_if_exist
-    cart_items_list = frappe.db.get_all(doctype="Sales Order",
-                                        fields=["`tabSales Order`.`name`", "`tabSales Order`.`owner`",
-                                                "`tabSales Order`.`creation`", "`tabSales Order`.`modified`",
-                                                "`tabSales Order`.`modified_by`", "`tabSales Order`.`_user_tags`",
-                                                "`tabSales Order`.`_comments`", "`tabSales Order`.`_assign`",
-                                                "`tabSales Order`.`_liked_by`", "`tabSales Order`.`docstatus`",
-                                                "`tabSales Order`.`parent`", "`tabSales Order`.`parenttype`",
-                                                "`tabSales Order`.`parentfield`", "`tabSales Order`.`idx`",
-                                                "`tabSales Order`.`delivery_date`", "`tabSales Order`.`total`",
-                                                "`tabSales Order`.`net_total`",
-                                                "`tabSales Order`.`total_taxes_and_charges`",
-                                                "`tabSales Order`.`discount_amount`",
-                                                "`tabSales Order`.`grand_total`",
-                                                "`tabSales Order`.`rounding_adjustment`",
-                                                "`tabSales Order`.`rounded_total`",
-                                                "`tabSales Order`.`advance_paid`",
-                                                "`tabSales Order`.`status`", "`tabSales Order`.`per_delivered`",
-                                                "`tabSales Order`.`per_billed`", "`tabSales Order`.`customer_name`",
-                                                "`tabSales Order`.`base_grand_total`",
-                                                "`tabSales Order`.`currency`",
-                                                "`tabSales Order`.`order_type`",
-                                                "`tabSales Order`.`skip_delivery_note`", "`tabSales Order`.`_seen`",
-                                                "`tabSales Order`.`party_account_currency`"],
-                                        filters=[["Sales Order", "docstatus", "=", "0"],
-                                                 ["Sales Order", "customer_name", "=", customerName],
-                                                 ["Sales Order", "company", "=", "Farmley"],
-                                                 ["Sales Order", "order_type", "=", "Shopping Cart"]],
-                                        order_by="`tabSales Order`.`modified` desc",
-                                        start=0, page_length=1,
-                                        with_comment_count=True)
+
+    cart_items_list = frappe.get_all('Sales Order', fields='*', filters={'status': 'Draft', 'customer': customerName, 'order_type': "Shopping Cart"})
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
@@ -270,3 +243,4 @@ def cart_items(customerName, source=None):
     except:
         print("Message")
     return cart_items_list_if_exist
+
