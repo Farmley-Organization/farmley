@@ -258,7 +258,7 @@ def cart_items(customerName, source=None):
                                         with_comment_count=True)
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Content-Type": "application/json",
-               # "X-Frappe-CSRF-Token": frappe.generate_hash()
+               "X-Frappe-CSRF-Token": frappe.generate_hash()
                }
     try:
         name = cart_items_list[0]["name"]
