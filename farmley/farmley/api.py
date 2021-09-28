@@ -226,17 +226,17 @@ def save_order(name):
 
 @frappe.whitelist()
 def cart_items(customerName, source=None):
-    global cart_items_list_if_exist
 
-    cart_items_list = frappe.get_all('Sales Order', fields='*', filters={'status': 'Draft', 'customer': customerName, 'order_type': "Shopping Cart"})
-    headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
+    global cart_items_list_if_exist
+    cart_items_list = frappe.get_all('Sales Order', fields='*', filters={'status': 'Draft', 'customer': customerName})
+    headers = {"Authorization": "Token 9e820d1621292f3:0988f37579207bc",
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
                }
     try:
         name = cart_items_list[0]["name"]
-        # url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
-        url = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
+        url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
+        # url = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
 
         save_orders_response = requests.get(url=url, headers=headers)
         cart_items_list_if_exist = json.loads(save_orders_response.content.decode('utf-8'))
