@@ -124,8 +124,8 @@ def open_product_category():
     product_category_json = []
     for row in db_data:
         d = collections.OrderedDict()
-        d['productCategotary'] = row[0]
-        d['productCategotaryName'] = row[1]
+        d['productCategory'] = row[0]
+        d['productCategoryName'] = row[1]
         product_category_json.append(d)
     return product_category_json
 
