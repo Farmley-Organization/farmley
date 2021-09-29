@@ -1,15 +1,10 @@
 from __future__ import unicode_literals
 import collections
 import json
-import logging
-
 import requests
-from boto3.docs import action
-
 import frappe
 from operator import itemgetter
 
-from frappe.geo import doctype
 
 
 @frappe.whitelist()
@@ -118,22 +113,22 @@ def featured_product(tagName):
 
 
 @frappe.whitelist()
-def open_product_category(source=None):
+def open_product_category():
     """
         param:source
         return:product_category
         # it will return the distinct product category to filter on frontend
     """
     sql_query = "select DISTINCT (product_category) from product_details"
-    _and = " and "
-    where = " where "
-    if source is not None: sql_query = sql_query + (
-        _and if "where" in sql_query else where) + "price_list like \'%{}%\'".format(source)
+    # _and = " and "
+    # where = " where "
+    # if source is not None: sql_query = sql_query + (
+    #     _and if "where" in sql_query else where) + "price_list like \'%{}%\'".format(source)
     db_data = frappe.db.sql(sql_query)
     product_category_json = []
     for row in db_data:
         d = collections.OrderedDict()
-        d['productCategory'] = row[0]
+        d['productCategota.ry'] = row[0]
         product_category_json.append(d)
     return product_category_json
 
@@ -145,8 +140,8 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
     return:addresses
     # this api will return all the addresses belong to that customer
     """
-    sql_query = "select address_title, name, city, state, country, pincode, contact_name, contact_number, " \
-                "address_line1, address_line2, locality from tabAddress "
+
+    sql_query = "select ta.address_title, ta.name, ta.city, ta.state, ta.country, ta.pincode, ta.contact_name, ta.contact_number,ta.address_line1, ta.address_line2, ta.locality, tl.link_name from tabAddress as ta "
     where = " where "
     _and = " and "
     if phoneNumber is not None: sql_query = sql_query + (
@@ -155,6 +150,8 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
         name)
     if emailId is not None: sql_query = sql_query + (
         _and if "where" in sql_query else where) + "email_id = \'{}\'".format(emailId)
+
+    sql_query = sql_query + " LEFT JOIN `tabDynamic Link` as tl ON tl.parent = ta.name "
     addresses = frappe.db.sql(sql_query)
     addresses_json = []
     for row in addresses:
@@ -170,6 +167,7 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
         d['line1'] = row[8]
         d['line2'] = row[9]
         d['locality'] = row[10]
+        d['customerName'] = row[11]
         addresses_json.append(d)
     return addresses_json
 
@@ -188,7 +186,7 @@ def add_to_cart(payload, source, name):
         save_orders_response = requests.post(url=url, data=json.dumps(payload), headers=headers)
         save_orders_json_data = json.loads(save_orders_response.content.decode('utf-8'))
         # adding tag on order
-        tag_url = "http://localhost:8000/api/method/frappe.desk.doctype.tag.tag.add_tag"
+        # tag_url = "http://localhost:8000/api/method/frappe.desk.doctype.tag.tag.add_tag"
         tag_url = "http://dev-erp.farmley.com/api/method/frappe.desk.doctype.tag.tag.add_tag"
         tag_payload = {"tag": source, "dt": "Sales Order", "dn": save_orders_json_data["data"]["name"]}
         tag_response = requests.post(url=tag_url, data=json.dumps(tag_payload), headers=headers)
@@ -225,22 +223,17 @@ def save_order(name):
 
 
 @frappe.whitelist()
-def cart_items(customerName, source=None):
+def cart_items(name, source=None):
 
-    global cart_items_list_if_exist
-    cart_items_list = frappe.get_all('Sales Order', fields='*', filters={'status': 'Draft', 'customer': customerName})
-    headers = {"Authorization": "Token 9e820d1621292f3:0988f37579207bc",
+    headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
                }
-    try:
-        name = cart_items_list[0]["name"]
-        url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
-        # url = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
+    # name = cart_items_list[0]["name"]
+    # url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
+    url = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
 
-        save_orders_response = requests.get(url=url, headers=headers)
-        cart_items_list_if_exist = json.loads(save_orders_response.content.decode('utf-8'))
-    except:
-        print("Message")
+    save_orders_response = requests.get(url=url, headers=headers)
+    cart_items_list_if_exist = json.loads(save_orders_response.content.decode('utf-8'))
     return cart_items_list_if_exist
 
