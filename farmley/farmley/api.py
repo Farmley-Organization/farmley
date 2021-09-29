@@ -119,16 +119,13 @@ def open_product_category():
         return:product_category
         # it will return the distinct product category to filter on frontend
     """
-    sql_query = "select DISTINCT (product_category) from product_details"
-    # _and = " and "
-    # where = " where "
-    # if source is not None: sql_query = sql_query + (
-    #     _and if "where" in sql_query else where) + "price_list like \'%{}%\'".format(source)
+    sql_query = "select DISTINCT(product_category),product_category_name from product_details"
     db_data = frappe.db.sql(sql_query)
     product_category_json = []
     for row in db_data:
         d = collections.OrderedDict()
-        d['productCategota.ry'] = row[0]
+        d['productCategotary'] = row[0]
+        d['productCategotaryName'] = row[1]
         product_category_json.append(d)
     return product_category_json
 
