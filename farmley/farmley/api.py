@@ -34,7 +34,7 @@ def product_details(name=None, productCategoryName=None, productName=None):
     """
     sql_query = "select name,product_code,product_name,product_category,packaging_size,media_url, " \
                 "hsn_code, barcode,parent_product_media_url,`Standard Buying`,`Website MRP List`," \
-                "`Website Price list`,`B2B Price List`,`Standard Selling`,uuid,slug from product_details "
+                "`Website Price list`,`B2B Price List`,`Standard Selling`,uuid,slug,website_description from product_details "
     where = " where "
     _and = " and "
     if name is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "name = \'{}\'".format(
@@ -66,6 +66,7 @@ def product_details(name=None, productCategoryName=None, productName=None):
         d['standardSelling'] = row[13]
         d['uuid'] = row[14]
         d['slug'] = row[15]
+        d['websiteDescription'] = row[16]
         products_json.append(d)
     return products_json
 
