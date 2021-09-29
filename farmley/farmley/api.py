@@ -141,7 +141,7 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
     # this api will return all the addresses belong to that customer
     """
 
-    sql_query = "select ta.address_title, ta.name, ta.city, ta.state, ta.country, ta.pincode, ta.contact_name, ta.contact_number,ta.address_line1, ta.address_line2, ta.locality, tl.link_name from tabAddress as ta "
+    sql_query = "select ta.address_title, ta.name, ta.city, ta.state, ta.country, ta.pincode, ta.phone,ta.address_line1, ta.address_line2, ta.locality, tl.link_name from tabAddress as ta "
     where = " where "
     _and = " and "
     if phoneNumber is not None: sql_query = sql_query + (
@@ -162,12 +162,11 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
         d['stateName'] = row[3]
         d['countryName'] = row[4]
         d['pincode'] = row[5]
-        d['contactName'] = row[6]
-        d['contactNumber'] = row[7]
-        d['line1'] = row[8]
-        d['line2'] = row[9]
-        d['locality'] = row[10]
-        d['customerName'] = row[11]
+        d['contactNumber'] = row[6]
+        d['line1'] = row[7]
+        d['line2'] = row[8]
+        d['locality'] = row[9]
+        d['customerName'] = row[10]
         addresses_json.append(d)
     return addresses_json
 
