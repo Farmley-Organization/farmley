@@ -140,16 +140,17 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
     """
 
     sql_query = "select ta.address_title, ta.name, ta.city, ta.state, ta.country, ta.pincode, ta.phone,ta.address_line1, ta.address_line2, ta.locality, tl.link_name from tabAddress as ta "
+    sql_query = sql_query + " LEFT JOIN `tabDynamic Link` as tl ON tl.parent = ta.name "
     where = " where "
     _and = " and "
     if phoneNumber is not None: sql_query = sql_query + (
-        _and if "where" in sql_query else where) + "phone = \'{}\'".format(phoneNumber)
-    if name is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "name = \'{}\'".format(
+        _and if "where" in sql_query else where) + "ta.phone = \'{}\'".format(phoneNumber)
+    if name is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "ta.name = \'{}\'".format(
         name)
     if emailId is not None: sql_query = sql_query + (
-        _and if "where" in sql_query else where) + "email_id = \'{}\'".format(emailId)
+        _and if "where" in sql_query else where) + "ta.email_id = \'{}\'".format(emailId)
 
-    sql_query = sql_query + " LEFT JOIN `tabDynamic Link` as tl ON tl.parent = ta.name "
+
     addresses = frappe.db.sql(sql_query)
     addresses_json = []
     for row in addresses:
