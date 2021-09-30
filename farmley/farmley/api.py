@@ -26,7 +26,7 @@ def parent_product_details():
 
 
 @frappe.whitelist()
-def product_details(name=None, productCategoryName=None, productName=None,parentProductCode= None):
+def product_details(name=None, productCategoryName=None, productName=None,parentProductCode= None, pageNumber = 0):
     """
     param:productId, productCategory, productName, source
     return: products_json
@@ -42,12 +42,11 @@ def product_details(name=None, productCategoryName=None, productName=None,parent
     if productCategoryName is not None: sql_query = sql_query + (
         _and if "where" in sql_query else where) + "product_category like \'%{}%\'".format(productCategoryName)
     if productName is not None: sql_query = sql_query + (
-        _and if "where" in sql_query else where) + "product_name like \'%{}%\'".format(productName)    
-
+        _and if "where" in sql_query else where) + "product_name like \'%{}%\'".format(productName)
     if parentProductCode is not None: sql_query = sql_query + (
         _and if "where" in sql_query else where) + "parent_product_code = \'{}\'".format(parentProductCode)
-    # if isParentProduct is True: sql_query = sql_query + (_and if "where" in sql_query else where) + " variant_of IS NULL "
-    # if isParentProduct is False: sql_query = sql_query + (_and if "where" in sql_query else where) + " variant_of IS NOT NULL "
+
+    sql_query = sql_query + "LIMIT {},10".format(int(pageNumber)*10)
 
     db_data = frappe.db.sql(sql_query)
     products_json = []
