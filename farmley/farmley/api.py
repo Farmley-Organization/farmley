@@ -46,7 +46,7 @@ def product_details(name=None, productCategoryName=None, productName=None,parent
     if parentProductCode is not None: sql_query = sql_query + (
         _and if "where" in sql_query else where) + "parent_product_code = \'{}\'".format(parentProductCode)
 
-    sql_query = sql_query + "LIMIT {},{}".format(int(pageNumber)*pageSize,pageSize)
+    sql_query = sql_query + "LIMIT {},{}".format(int(pageNumber)*int(pageSize),int(pageSize))
 
     db_data = frappe.db.sql(sql_query)
     products_json = []
@@ -71,7 +71,7 @@ def product_details(name=None, productCategoryName=None, productName=None,parent
         d['websiteDescription'] = row[16]
         d['parentProductCode'] = row[17]
         products_json.append(d)
-    return products_json
+    return products_json, sql_query
 
 
 @frappe.whitelist()
