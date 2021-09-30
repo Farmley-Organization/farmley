@@ -26,7 +26,7 @@ def parent_product_details():
 
 
 @frappe.whitelist()
-def product_details(name=None, productCategoryName=None, productName=None,parentProductCode= None, pageNumber = 0):
+def product_details(name=None, productCategoryName=None, productName=None,parentProductCode= None, pageNumber = 0,pageSize=10):
     """
     param:productId, productCategory, productName, source
     return: products_json
@@ -46,7 +46,7 @@ def product_details(name=None, productCategoryName=None, productName=None,parent
     if parentProductCode is not None: sql_query = sql_query + (
         _and if "where" in sql_query else where) + "parent_product_code = \'{}\'".format(parentProductCode)
 
-    sql_query = sql_query + "LIMIT {},10".format(int(pageNumber)*10)
+    sql_query = sql_query + "LIMIT {},{}".format(int(pageNumber)*pageSize,pageSize)
 
     db_data = frappe.db.sql(sql_query)
     products_json = []
