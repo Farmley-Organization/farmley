@@ -253,3 +253,16 @@ def cart_items(name, source=None):
     save_orders_response = requests.get(url=url, headers=headers)
     cart_items_list_if_exist = json.loads(save_orders_response.content.decode('utf-8'))
     return cart_items_list_if_exist
+
+@frappe.whitelist()
+def delete_cart(name):
+    headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
+               "Content-Type": "application/json",
+               "X-Frappe-CSRF-Token": frappe.generate_hash()
+               }
+    payload = {"doctype": "Sales Order",
+                "name":name}
+    request_url = "http://dev-erp.farmley.com/api/method/frappe.client.delete"
+    delete_cart_response = requests.post(url=request_url, headers=headers,data=json.dumps(payload))
+    delete_cart_response_json = json.loads(delete_cart_response.content.decode('utf-8'))
+    return True
