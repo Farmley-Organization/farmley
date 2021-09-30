@@ -41,21 +41,21 @@ def product_details(name=None, productCategoryName=None, productName=None, paren
     _and = " and "
     if name is not None:
         sql_query = sql_query + (_and if "where" in sql_query else where) + "name = \'{}\'".format(name)
-        count_query = count_query + (_and if "where" in sql_query else where) + "name = \'{}\'".format(name)
+        count_query = count_query + (_and if "where" in count_query else where) + "name = \'{}\'".format(name)
     if productCategoryName is not None:
         sql_query = sql_query + (_and if "where" in sql_query else where) + "product_category like \'%{}%\'".format(
             productCategoryName)
-        count_query = count_query + (_and if "where" in sql_query else where) + "product_category like \'%{}%\'".format(
+        count_query = count_query + (_and if "where" in count_query else where) + "product_category like \'%{}%\'".format(
             productCategoryName)
     if productName is not None:
         sql_query = sql_query + (_and if "where" in sql_query else where) + "product_name like \'%{}%\'".format(
             productName)
-        count_query = count_query + (_and if "where" in sql_query else where) + "product_name like \'%{}%\'".format(
+        count_query = count_query + (_and if "where" in count_query else where) + "product_name like \'%{}%\'".format(
             productName)
     if parentProductCode is not None:
         sql_query = sql_query + (_and if "where" in sql_query else where) + "parent_product_code = \'{}\'".format(
             parentProductCode)
-        count_query = count_query + (_and if "where" in sql_query else where) + "parent_product_code = \'{}\'".format(
+        count_query = count_query + (_and if "where" in count_query else where) + "parent_product_code = \'{}\'".format(
             parentProductCode)
     sql_query = sql_query + "LIMIT {},{}".format(int(pageNumber) * int(pageSize), int(pageSize))
     count = frappe.db.sql(count_query)
@@ -87,9 +87,9 @@ def product_details(name=None, productCategoryName=None, productName=None, paren
         d['websiteDescription'] = row[16]
         d['parentProductCode'] = row[17]
         products_json.append(d)
-    p_json["productData"]= products_json
-    p_json["totalPages"]= total_pages
-    return  p_json
+    p_json["productData"] = products_json
+    p_json["totalPages"] = total_pages
+    return p_json
 
 
 @frappe.whitelist()
@@ -254,6 +254,7 @@ def cart_items(name, source=None):
     cart_items_list_if_exist = json.loads(save_orders_response.content.decode('utf-8'))
     return cart_items_list_if_exist
 
+
 @frappe.whitelist()
 def delete_cart(name):
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
@@ -261,8 +262,8 @@ def delete_cart(name):
                "X-Frappe-CSRF-Token": frappe.generate_hash()
                }
     payload = {"doctype": "Sales Order",
-                "name":name}
+               "name": name}
     request_url = "http://dev-erp.farmley.com/api/method/frappe.client.delete"
-    delete_cart_response = requests.post(url=request_url, headers=headers,data=json.dumps(payload))
+    delete_cart_response = requests.post(url=request_url, headers=headers, data=json.dumps(payload))
     delete_cart_response_json = json.loads(delete_cart_response.content.decode('utf-8'))
     return True
