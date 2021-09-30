@@ -4,7 +4,7 @@ import json
 import requests
 import frappe
 from operator import itemgetter
-
+import math
 
 
 @frappe.whitelist()
@@ -26,7 +26,8 @@ def parent_product_details():
 
 
 @frappe.whitelist()
-def product_details(name=None, productCategoryName=None, productName=None,parentProductCode= None, pageNumber = 0,pageSize=10):
+def product_details(name=None, productCategoryName=None, productName=None, parentProductCode=None, pageNumber=0,
+                    pageSize=10):
     """
     param:productId, productCategory, productName, source
     return: products_json
@@ -35,21 +36,36 @@ def product_details(name=None, productCategoryName=None, productName=None,parent
     sql_query = "select name,product_code,product_name,product_category,packaging_size,media_url, " \
                 "hsn_code, barcode,parent_product_media_url,`Standard Buying`,`Website MRP List`," \
                 "`Website Price list`,`B2B Price List`,`Standard Selling`,uuid,slug,website_description,parent_product_code from product_details "
+    count_query = "select COUNT(*) from product_details"
     where = " where "
     _and = " and "
-    if name is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "name = \'{}\'".format(
-        name)
-    if productCategoryName is not None: sql_query = sql_query + (
-        _and if "where" in sql_query else where) + "product_category like \'%{}%\'".format(productCategoryName)
-    if productName is not None: sql_query = sql_query + (
-        _and if "where" in sql_query else where) + "product_name like \'%{}%\'".format(productName)
-    if parentProductCode is not None: sql_query = sql_query + (
-        _and if "where" in sql_query else where) + "parent_product_code = \'{}\'".format(parentProductCode)
-
-    sql_query = sql_query + "LIMIT {},{}".format(int(pageNumber)*int(pageSize),int(pageSize))
+    if name is not None:
+        sql_query = sql_query + (_and if "where" in sql_query else where) + "name = \'{}\'".format(name)
+        count_query = count_query + (_and if "where" in sql_query else where) + "name = \'{}\'".format(name)
+    if productCategoryName is not None:
+        sql_query = sql_query + (_and if "where" in sql_query else where) + "product_category like \'%{}%\'".format(
+            productCategoryName)
+        count_query = count_query + (_and if "where" in sql_query else where) + "product_category like \'%{}%\'".format(
+            productCategoryName)
+    if productName is not None:
+        sql_query = sql_query + (_and if "where" in sql_query else where) + "product_name like \'%{}%\'".format(
+            productName)
+        count_query = count_query + (_and if "where" in sql_query else where) + "product_name like \'%{}%\'".format(
+            productName)
+    if parentProductCode is not None:
+        sql_query = sql_query + (_and if "where" in sql_query else where) + "parent_product_code = \'{}\'".format(
+            parentProductCode)
+        count_query = count_query + (_and if "where" in sql_query else where) + "parent_product_code = \'{}\'".format(
+            parentProductCode)
+    sql_query = sql_query + "LIMIT {},{}".format(int(pageNumber) * int(pageSize), int(pageSize))
+    count = frappe.db.sql(count_query)
+    count = count[0][0]
+    page = count / int(pageSize)
+    total_pages = math.ceil(page)
 
     db_data = frappe.db.sql(sql_query)
     products_json = []
+    p_json = {}
     for row in db_data:
         d = collections.OrderedDict()
         d['name'] = row[0]
@@ -71,7 +87,9 @@ def product_details(name=None, productCategoryName=None, productName=None,parent
         d['websiteDescription'] = row[16]
         d['parentProductCode'] = row[17]
         products_json.append(d)
-    return products_json
+    p_json["productData"]= products_json
+    p_json["totalPages"]= total_pages
+    return  p_json
 
 
 @frappe.whitelist()
@@ -153,7 +171,6 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
     if emailId is not None: sql_query = sql_query + (
         _and if "where" in sql_query else where) + "ta.email_id = \'{}\'".format(emailId)
 
-
     addresses = frappe.db.sql(sql_query)
     addresses_json = []
     for row in addresses:
@@ -225,7 +242,6 @@ def save_order(name):
 
 @frappe.whitelist()
 def cart_items(name, source=None):
-
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
@@ -237,4 +253,3 @@ def cart_items(name, source=None):
     save_orders_response = requests.get(url=url, headers=headers)
     cart_items_list_if_exist = json.loads(save_orders_response.content.decode('utf-8'))
     return cart_items_list_if_exist
-
