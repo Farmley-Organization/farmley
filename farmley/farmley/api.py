@@ -71,7 +71,7 @@ def product_details(name=None, productCategoryName=None, productName=None,parent
         d['websiteDescription'] = row[16]
         d['parentProductCode'] = row[17]
         products_json.append(d)
-    return products_json, sql_query
+    return products_json
 
 
 @frappe.whitelist()
