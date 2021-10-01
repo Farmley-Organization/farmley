@@ -45,7 +45,8 @@ def product_details(name=None, productCategoryName=None, productName=None, paren
     if productCategoryName is not None:
         sql_query = sql_query + (_and if "where" in sql_query else where) + "product_category like \'%{}%\'".format(
             productCategoryName)
-        count_query = count_query + (_and if "where" in count_query else where) + "product_category like \'%{}%\'".format(
+        count_query = count_query + (
+            _and if "where" in count_query else where) + "product_category like \'%{}%\'".format(
             productCategoryName)
     if productName is not None:
         sql_query = sql_query + (_and if "where" in sql_query else where) + "product_name like \'%{}%\'".format(
@@ -191,6 +192,53 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
 
 
 @frappe.whitelist()
+def create_address(addressTitle=None, emailID=None, phone=None, addressLine1=None, addressLine2=None, city=None,
+                   county=None,
+                   state=None, pincode=None, customerName=None):
+    headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
+               "Content-Type": "application/json",
+               "X-Frappe-CSRF-Token": frappe.generate_hash()
+               }
+
+    doc_dict = {
+        "docstatus": 0,
+        "doctype": "Address",
+        "links": [
+            {
+                "docstatus": 0,
+                "doctype": "Dynamic Link",
+                "name": "new-dynamic-link-2",
+                "parent": "new-address-2",
+                "parentfield": "links",
+                "parenttype": "Address",
+                "idx": 1,
+                "link_doctype": "Customer",
+                "link_name": customerName
+            }
+        ],
+        "address_title": addressTitle,
+        "email_id": emailID,
+        "phone": phone,
+        "address_line1": addressLine1,
+        "address_line2": addressLine2,
+        "city": city,
+        "county": county,
+        "state": state,
+        "pincode": pincode
+    }
+
+    payload = {
+        "doc": json.dumps(doc_dict),
+        "action": "Save"
+    }
+    request_url = "http://dev-erp.farmley.com/api/method/frappe.desk.form.save.savedocs"
+
+    save_address_res = requests.post(url=request_url, data=json.dumps(payload), headers=headers)
+    add_save_json = json.loads(save_address_res.content.decode('utf-8'))
+    return add_save_json
+
+
+@frappe.whitelist()
 def add_to_cart(payload, source, name):
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Accept": "application/json",
@@ -275,11 +323,13 @@ def orders(customer):
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
                }
-    payload={"filters": """[["Sales Order","workflow_state","!=","Draft"],["Sales Order","customer","=","{}"]]""".format(customer),
-             "fields":"""["`tabSales Order`.`workflow_state`","`tabSales Order`.`name`","`tabSales Order`.`owner`","`tabSales Order`.`creation`","`tabSales Order`.`modified`","`tabSales Order`.`modified_by`","`tabSales Order`.`_user_tags`","`tabSales Order`.`_comments`","`tabSales Order`.`_assign`","`tabSales Order`.`_liked_by`","`tabSales Order`.`docstatus`","`tabSales Order`.`parent`","`tabSales Order`.`parenttype`","`tabSales Order`.`parentfield`","`tabSales Order`.`idx`","`tabSales Order`.`delivery_date`","`tabSales Order`.`total`","`tabSales Order`.`net_total`","`tabSales Order`.`total_taxes_and_charges`","`tabSales Order`.`discount_amount`","`tabSales Order`.`grand_total`","`tabSales Order`.`rounding_adjustment`","`tabSales Order`.`rounded_total`","`tabSales Order`.`advance_paid`","`tabSales Order`.`status`","`tabSales Order`.`per_delivered`","`tabSales Order`.`per_billed`","`tabSales Order`.`customer_name`","`tabSales Order`.`base_grand_total`","`tabSales Order`.`currency`","`tabSales Order`.`order_type`","`tabSales Order`.`skip_delivery_note`","`tabSales Order`.`_seen`","`tabSales Order`.`party_account_currency`"]"""}
+    payload = {
+        "filters": """[["Sales Order","workflow_state","!=","Draft"],["Sales Order","customer","=","{}"]]""".format(
+            customer),
+        "fields": """["`tabSales Order`.`workflow_state`","`tabSales Order`.`name`","`tabSales Order`.`owner`","`tabSales Order`.`creation`","`tabSales Order`.`modified`","`tabSales Order`.`modified_by`","`tabSales Order`.`_user_tags`","`tabSales Order`.`_comments`","`tabSales Order`.`_assign`","`tabSales Order`.`_liked_by`","`tabSales Order`.`docstatus`","`tabSales Order`.`parent`","`tabSales Order`.`parenttype`","`tabSales Order`.`parentfield`","`tabSales Order`.`idx`","`tabSales Order`.`delivery_date`","`tabSales Order`.`total`","`tabSales Order`.`net_total`","`tabSales Order`.`total_taxes_and_charges`","`tabSales Order`.`discount_amount`","`tabSales Order`.`grand_total`","`tabSales Order`.`rounding_adjustment`","`tabSales Order`.`rounded_total`","`tabSales Order`.`advance_paid`","`tabSales Order`.`status`","`tabSales Order`.`per_delivered`","`tabSales Order`.`per_billed`","`tabSales Order`.`customer_name`","`tabSales Order`.`base_grand_total`","`tabSales Order`.`currency`","`tabSales Order`.`order_type`","`tabSales Order`.`skip_delivery_note`","`tabSales Order`.`_seen`","`tabSales Order`.`party_account_currency`"]"""}
     # url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
     url = "http://dev-erp.farmley.com/api/resource/Sales Order"
 
-    orders_list_response = requests.get(url=url, headers=headers,data=json.dumps(payload))
+    orders_list_response = requests.get(url=url, headers=headers, data=json.dumps(payload))
     orders_list = json.loads(orders_list_response.content.decode('utf-8'))
     return orders_list
