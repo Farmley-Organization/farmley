@@ -143,6 +143,7 @@ def open_product_category():
         # it will return the distinct product category to filter on frontend
     """
     sql_query = "select DISTINCT(product_category),product_category_name from product_details"
+    # need media url here
     db_data = frappe.db.sql(sql_query)
     product_category_json = []
     for row in db_data:
@@ -192,9 +193,7 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
 
 
 @frappe.whitelist()
-def create_address(addressTitle=None, emailID=None, phone=None, addressLine1=None, addressLine2=None, city=None,
-                   county=None,
-                   state=None, pincode=None, customerName=None):
+def create_address(addressTitle, emailId, phone, addressLine1, city, state, pincode, customerName,  addressLine2=None,county=None):
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
@@ -217,7 +216,7 @@ def create_address(addressTitle=None, emailID=None, phone=None, addressLine1=Non
             }
         ],
         "address_title": addressTitle,
-        "email_id": emailID,
+        "email_id": emailId,
         "phone": phone,
         "address_line1": addressLine1,
         "address_line2": addressLine2,
@@ -235,6 +234,9 @@ def create_address(addressTitle=None, emailID=None, phone=None, addressLine1=Non
 
     save_address_res = requests.post(url=request_url, data=json.dumps(payload), headers=headers)
     add_save_json = json.loads(save_address_res.content.decode('utf-8'))
+    message = """["{\\"message\\": \\"Saved\\", \\"indicator\\": \\"green\\", \\"alert\\": 1}"]"""
+    if add_save_json['_server_messages'] == message:
+        return True
     return add_save_json
 
 
