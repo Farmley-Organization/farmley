@@ -193,7 +193,8 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
 
 
 @frappe.whitelist()
-def create_address(addressTitle, emailId, phone, addressLine1, city, state, pincode, customerName,  addressLine2=None,county=None):
+def create_address(addressTitle, emailId, phone, addressLine1, city, state, pincode, customerName, addressLine2=None,
+                   county=None):
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
@@ -237,7 +238,8 @@ def create_address(addressTitle, emailId, phone, addressLine1, city, state, pinc
     message = """["{\\"message\\": \\"Saved\\", \\"indicator\\": \\"green\\", \\"alert\\": 1}"]"""
     if add_save_json['_server_messages'] == message:
         return True
-    return add_save_json
+    else:
+        return False
 
 
 @frappe.whitelist()
