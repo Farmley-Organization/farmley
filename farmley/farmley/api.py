@@ -271,7 +271,7 @@ def add_to_cart(payload, source, name):
 
 
 @frappe.whitelist()
-def save_order(name):
+def save_order(name, grandTotal=None):
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Accept": "apcustomerAddress, transactionDate, itemCode, itemName, deliveryDate, qty, rate,plication/json",
                "Content-Type": "application/json",
@@ -280,16 +280,23 @@ def save_order(name):
 
     # url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
     url = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
+    url1 = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
 
-    payload = {
-        "order_type": "Sales",
-        "docstatus": 1
-    }
+    save_orders_response = requests.get(url=url1, headers=headers)
+    orders_data_json = json.loads(save_orders_response.content.decode('utf-8'))
 
-    save_orders_response = requests.put(url=url, data=json.dumps(payload), headers=headers)
-    save_orders_response_data = json.loads(save_orders_response.content.decode('utf-8'))
+    if float(grandTotal) == orders_data_json["data"]["grand_total"]:
+        payload = {
+            "order_type": "Sales",
+            "docstatus": 1
+        }
 
-    return save_orders_response_data
+        save_orders_response = requests.put(url=url, data=json.dumps(payload), headers=headers)
+        save_orders_response_data = json.loads(save_orders_response.content.decode('utf-8'))
+        return save_orders_response_data
+    else:
+        return False
+
 
 
 @frappe.whitelist()
