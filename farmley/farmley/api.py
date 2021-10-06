@@ -1,7 +1,11 @@
 from __future__ import unicode_literals
 import collections
 import json
+import logging
+
 import requests
+
+import erpnext
 import frappe
 from operator import itemgetter
 import math
@@ -280,9 +284,9 @@ def save_order(name, grandTotal=None):
 
     # url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
     url = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
-    url1 = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
+    # url1 = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
 
-    save_orders_response = requests.get(url=url1, headers=headers)
+    save_orders_response = requests.get(url=url, headers=headers)
     orders_data_json = json.loads(save_orders_response.content.decode('utf-8'))
 
     if float(grandTotal) == orders_data_json["data"]["grand_total"]:
@@ -293,10 +297,9 @@ def save_order(name, grandTotal=None):
 
         save_orders_response = requests.put(url=url, data=json.dumps(payload), headers=headers)
         save_orders_response_data = json.loads(save_orders_response.content.decode('utf-8'))
-        return save_orders_response_data
+        return True
     else:
         return False
-
 
 
 @frappe.whitelist()
@@ -337,10 +340,23 @@ def orders(customer):
     payload = {
         "filters": """[["Sales Order","workflow_state","!=","Draft"],["Sales Order","customer","=","{}"]]""".format(
             customer),
-        "fields": """["`tabSales Order`.`workflow_state`","`tabSales Order`.`name`","`tabSales Order`.`owner`","`tabSales Order`.`creation`","`tabSales Order`.`modified`","`tabSales Order`.`modified_by`","`tabSales Order`.`_user_tags`","`tabSales Order`.`_comments`","`tabSales Order`.`_assign`","`tabSales Order`.`_liked_by`","`tabSales Order`.`docstatus`","`tabSales Order`.`parent`","`tabSales Order`.`parenttype`","`tabSales Order`.`parentfield`","`tabSales Order`.`idx`","`tabSales Order`.`delivery_date`","`tabSales Order`.`total`","`tabSales Order`.`net_total`","`tabSales Order`.`total_taxes_and_charges`","`tabSales Order`.`discount_amount`","`tabSales Order`.`grand_total`","`tabSales Order`.`rounding_adjustment`","`tabSales Order`.`rounded_total`","`tabSales Order`.`advance_paid`","`tabSales Order`.`status`","`tabSales Order`.`per_delivered`","`tabSales Order`.`per_billed`","`tabSales Order`.`customer_name`","`tabSales Order`.`base_grand_total`","`tabSales Order`.`currency`","`tabSales Order`.`order_type`","`tabSales Order`.`skip_delivery_note`","`tabSales Order`.`_seen`","`tabSales Order`.`party_account_currency`"]"""}
-    # url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
+        "fields": """["`tabSales Order`.`workflow_state`","`tabSales Order`.`name`","`tabSales Order`.`owner`",
+        "`tabSales Order`.`creation`","`tabSales Order`.`modified`","`tabSales Order`.`modified_by`","`tabSales 
+        Order`.`_user_tags`","`tabSales Order`.`_comments`","`tabSales Order`.`_assign`","`tabSales 
+        Order`.`_liked_by`","`tabSales Order`.`docstatus`","`tabSales Order`.`parent`","`tabSales 
+        Order`.`parenttype`","`tabSales Order`.`parentfield`","`tabSales Order`.`idx`","`tabSales 
+        Order`.`delivery_date`","`tabSales Order`.`total`","`tabSales Order`.`net_total`","`tabSales 
+        Order`.`total_taxes_and_charges`","`tabSales Order`.`discount_amount`","`tabSales Order`.`grand_total`",
+        "`tabSales Order`.`rounding_adjustment`","`tabSales Order`.`rounded_total`","`tabSales 
+        Order`.`advance_paid`","`tabSales Order`.`status`","`tabSales Order`.`per_delivered`","`tabSales 
+        Order`.`per_billed`","`tabSales Order`.`customer_name`","`tabSales Order`.`base_grand_total`","`tabSales 
+        Order`.`currency`","`tabSales Order`.`order_type`","`tabSales Order`.`skip_delivery_note`","`tabSales 
+        Order`.`_seen`","`tabSales Order`.`party_account_currency`"]"""}
     url = "http://dev-erp.farmley.com/api/resource/Sales Order"
-
+    order_details_list = []
     orders_list_response = requests.get(url=url, headers=headers, data=json.dumps(payload))
     orders_list = json.loads(orders_list_response.content.decode('utf-8'))
-    return orders_list
+    for i in range(len(orders_list["data"])):
+        print(orders_list["data"][i]["name"])
+        order_details_list.append(cart_items(orders_list["data"][i]["name"]))
+    return order_details_list
