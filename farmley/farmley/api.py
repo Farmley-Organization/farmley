@@ -340,18 +340,7 @@ def orders(customer):
     payload = {
         "filters": """[["Sales Order","workflow_state","!=","Draft"],["Sales Order","customer","=","{}"]]""".format(
             customer),
-        "fields": """["`tabSales Order`.`workflow_state`","`tabSales Order`.`name`","`tabSales Order`.`owner`",
-        "`tabSales Order`.`creation`","`tabSales Order`.`modified`","`tabSales Order`.`modified_by`","`tabSales 
-        Order`.`_user_tags`","`tabSales Order`.`_comments`","`tabSales Order`.`_assign`","`tabSales 
-        Order`.`_liked_by`","`tabSales Order`.`docstatus`","`tabSales Order`.`parent`","`tabSales 
-        Order`.`parenttype`","`tabSales Order`.`parentfield`","`tabSales Order`.`idx`","`tabSales 
-        Order`.`delivery_date`","`tabSales Order`.`total`","`tabSales Order`.`net_total`","`tabSales 
-        Order`.`total_taxes_and_charges`","`tabSales Order`.`discount_amount`","`tabSales Order`.`grand_total`",
-        "`tabSales Order`.`rounding_adjustment`","`tabSales Order`.`rounded_total`","`tabSales 
-        Order`.`advance_paid`","`tabSales Order`.`status`","`tabSales Order`.`per_delivered`","`tabSales 
-        Order`.`per_billed`","`tabSales Order`.`customer_name`","`tabSales Order`.`base_grand_total`","`tabSales 
-        Order`.`currency`","`tabSales Order`.`order_type`","`tabSales Order`.`skip_delivery_note`","`tabSales 
-        Order`.`_seen`","`tabSales Order`.`party_account_currency`"]"""}
+        "fields": """["`tabSales Order`.`workflow_state`","`tabSales Order`.`name`","`tabSales Order`.`owner`","`tabSales Order`.`creation`","`tabSales Order`.`modified`","`tabSales Order`.`modified_by`","`tabSales Order`.`_user_tags`","`tabSales Order`.`_comments`","`tabSales Order`.`_assign`","`tabSales Order`.`_liked_by`","`tabSales Order`.`docstatus`","`tabSales Order`.`parent`","`tabSales Order`.`parenttype`","`tabSales Order`.`parentfield`","`tabSales Order`.`idx`","`tabSales Order`.`delivery_date`","`tabSales Order`.`total`","`tabSales Order`.`net_total`","`tabSales Order`.`total_taxes_and_charges`","`tabSales Order`.`discount_amount`","`tabSales Order`.`grand_total`","`tabSales Order`.`rounding_adjustment`","`tabSales Order`.`rounded_total`","`tabSales Order`.`advance_paid`","`tabSales Order`.`status`","`tabSales Order`.`per_delivered`","`tabSales Order`.`per_billed`","`tabSales Order`.`customer_name`","`tabSales Order`.`base_grand_total`","`tabSales Order`.`currency`","`tabSales Order`.`order_type`","`tabSales Order`.`skip_delivery_note`","`tabSales Order`.`_seen`","`tabSales Order`.`party_account_currency`"]"""}
     url = "http://dev-erp.farmley.com/api/resource/Sales Order"
     order_details_list = []
     orders_list_response = requests.get(url=url, headers=headers, data=json.dumps(payload))
