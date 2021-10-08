@@ -1,11 +1,7 @@
 from __future__ import unicode_literals
 import collections
 import json
-import logging
-
 import requests
-
-import erpnext
 import frappe
 from operator import itemgetter
 import math
@@ -275,12 +271,13 @@ def add_to_cart(payload, source, name):
 
 
 @frappe.whitelist()
-def save_order(name, grandTotal=None):
+def save_order(name, customer, refrence_number, refrence_date, grandTotal=None):
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Accept": "apcustomerAddress, transactionDate, itemCode, itemName, deliveryDate, qty, rate,plication/json",
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
                }
+    grandTotal = float(grandTotal)
 
     # url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
     url = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
@@ -288,6 +285,70 @@ def save_order(name, grandTotal=None):
 
     save_orders_response = requests.get(url=url, headers=headers)
     orders_data_json = json.loads(save_orders_response.content.decode('utf-8'))
+    doc_dict = {
+            "docstatus": 0,
+            "doctype": "Payment Entry",
+            "name": "new-payment-entry-1",
+            "__islocal": 1,
+            "__unsaved": 1,
+            "naming_series": "ACC-PAY-.YYYY.-",
+            "payment_type": "Receive",
+            "payment_order_status": "Initiated",
+            "posting_date": refrence_date,
+            "company": "Connedit Business Solutions Pvt. Ltd.",
+            "status": "Draft",
+            "custom_remarks": 0,
+            "letter_head": "Letter Head Farmley",
+            "party_type": "Customer",
+            "party": customer,
+            "paid_from": "14830 - Debtors - CBSPL",
+            "paid_from_account_balance": 0,
+        "references": [
+            {
+                "docstatus": 0,
+                "doctype": "Payment Entry Reference",
+                "name": "new-payment-entry-reference-1",
+                "__islocal": 1,
+                "__unsaved": 1,
+                "parent": "new-payment-entry-1",
+                "parentfield": "references",
+                "parenttype": "Payment Entry",
+                "idx": 1,
+                "reference_doctype": "Sales Order",
+                "reference_name": name,
+                "total_amount": grandTotal,
+                "outstanding_amount": grandTotal,
+                "exchange_rate": 1,
+                "allocated_amount": grandTotal
+            }
+        ],
+        "customer_address": "Home-Billing-16",
+        "customer_gstin": None,
+        "paid_to": "14311 - YES BANK A/C 023581300000540 - CBSPL",
+        "paid_to_account_balance": 0,
+        "mode_of_payment": "PG - Paytm",
+        "bank": "Yes Bank",
+        "bank_account_no": "023581300000540",
+        "bank_account": "Yes Bank - Current Acc - Yes Bank",
+        "taxes": [
+
+        ],
+        "total_taxes_and_charges": 0,
+        "base_total_taxes_and_charges": 0,
+        "unallocated_amount": 0,
+        "difference_amount": 0,
+        "paid_amount": grandTotal,
+        "base_paid_amount": grandTotal,
+        "received_amount": grandTotal,
+        "base_received_amount": grandTotal,
+        "total_allocated_amount": grandTotal,
+        "base_total_allocated_amount": grandTotal,
+        "reference_no": refrence_number,
+        "reference_date": refrence_date
+    }
+    payment_payload={ "doc": json.dumps(doc_dict),
+        "action": "Submit"}
+    url_payment_entry = "http://dev-erp.farmley.com/api/method/frappe.desk.form.save.savedocs"
 
     if float(grandTotal) == orders_data_json["data"]["grand_total"]:
         payload = {
@@ -297,7 +358,10 @@ def save_order(name, grandTotal=None):
 
         save_orders_response = requests.put(url=url, data=json.dumps(payload), headers=headers)
         save_orders_response_data = json.loads(save_orders_response.content.decode('utf-8'))
-        return True
+        payment_entry_response = requests.put(url=url_payment_entry, data=json.dumps(payment_payload), headers=headers)
+        payment_entry_json_data = json.loads(payment_entry_response.content.decode('utf-8'))
+
+        return True,payment_entry_json_data
     else:
         return False
 
@@ -346,6 +410,5 @@ def orders(customer):
     orders_list_response = requests.get(url=url, headers=headers, data=json.dumps(payload))
     orders_list = json.loads(orders_list_response.content.decode('utf-8'))
     for i in range(len(orders_list["data"])):
-        print(orders_list["data"][i]["name"])
         order_details_list.append(cart_items(orders_list["data"][i]["name"]))
     return order_details_list
