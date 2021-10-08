@@ -206,6 +206,7 @@ def create_address(addressTitle, emailId, phone, addressLine1, city, state, pinc
         "doctype": "Address",
         "address_type": addressType,
         "gstin": gstNumber,
+        "gst_state":state,
         "links": [
             {
                 "docstatus": 0,
