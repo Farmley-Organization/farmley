@@ -274,7 +274,7 @@ def add_to_cart(payload, source, name):
 
 
 @frappe.whitelist()
-def save_order(name, customer, refrenceNumber, refrenceDate, grandTotal=None):
+def save_order(name, customer, refrenceDate, grandTotal=None):
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Accept": "apcustomerAddress, transactionDate, itemCode, itemName, deliveryDate, qty, rate,plication/json",
                "Content-Type": "application/json",
@@ -346,7 +346,7 @@ def save_order(name, customer, refrenceNumber, refrenceDate, grandTotal=None):
         "base_received_amount": grandTotal,
         "total_allocated_amount": grandTotal,
         "base_total_allocated_amount": grandTotal,
-        "reference_no": refrenceNumber,
+        "reference_no": name,
         "reference_date": refrenceDate
     }
     payment_payload={ "doc": json.dumps(doc_dict),
