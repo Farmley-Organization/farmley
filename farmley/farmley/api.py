@@ -162,7 +162,7 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
     # this api will return all the addresses belong to that customer
     """
 
-    sql_query = "select ta.address_title, ta.name, ta.city, ta.state, ta.country, ta.pincode, ta.phone,ta.address_line1, ta.address_line2, ta.locality, tl.link_name from tabAddress as ta "
+    sql_query = "select ta.address_title, ta.name, ta.city, ta.state, ta.country, ta.pincode, ta.phone,ta.address_line1, ta.address_line2, ta.locality, tl.link_name, ta.address_type from tabAddress as ta "
     sql_query = sql_query + " LEFT JOIN `tabDynamic Link` as tl ON tl.parent = ta.name "
     where = " where "
     _and = " and "
@@ -188,13 +188,14 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
         d['line2'] = row[8]
         d['locality'] = row[9]
         d['customerName'] = row[10]
+        d['addressType'] = row[11]
         addresses_json.append(d)
     return addresses_json
 
 
 @frappe.whitelist()
-def create_address(addressTitle, emailId, phone, addressLine1, city, state, pincode, customerName, addressLine2=None,
-                   county=None):
+def create_address(addressTitle, emailId, phone, addressLine1, city, state, pincode, customerName,addressType, addressLine2=None,
+                   county=None, gstNumber = None):
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
@@ -203,6 +204,8 @@ def create_address(addressTitle, emailId, phone, addressLine1, city, state, pinc
     doc_dict = {
         "docstatus": 0,
         "doctype": "Address",
+        "address_type": addressType,
+        "gstin": gstNumber,
         "links": [
             {
                 "docstatus": 0,
@@ -271,7 +274,7 @@ def add_to_cart(payload, source, name):
 
 
 @frappe.whitelist()
-def save_order(name, customer, refrence_number, refrence_date, grandTotal=None):
+def save_order(name, customer, refrenceNumber, refrenceDate, grandTotal=None):
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Accept": "apcustomerAddress, transactionDate, itemCode, itemName, deliveryDate, qty, rate,plication/json",
                "Content-Type": "application/json",
@@ -294,7 +297,7 @@ def save_order(name, customer, refrence_number, refrence_date, grandTotal=None):
             "naming_series": "ACC-PAY-.YYYY.-",
             "payment_type": "Receive",
             "payment_order_status": "Initiated",
-            "posting_date": refrence_date,
+            "posting_date": refrenceDate,
             "company": "Connedit Business Solutions Pvt. Ltd.",
             "status": "Draft",
             "custom_remarks": 0,
@@ -343,8 +346,8 @@ def save_order(name, customer, refrence_number, refrence_date, grandTotal=None):
         "base_received_amount": grandTotal,
         "total_allocated_amount": grandTotal,
         "base_total_allocated_amount": grandTotal,
-        "reference_no": refrence_number,
-        "reference_date": refrence_date
+        "reference_no": refrenceNumber,
+        "reference_date": refrenceDate
     }
     payment_payload={ "doc": json.dumps(doc_dict),
         "action": "Submit"}
@@ -361,7 +364,7 @@ def save_order(name, customer, refrence_number, refrence_date, grandTotal=None):
         payment_entry_response = requests.put(url=url_payment_entry, data=json.dumps(payment_payload), headers=headers)
         payment_entry_json_data = json.loads(payment_entry_response.content.decode('utf-8'))
 
-        return True,payment_entry_json_data
+        return True
     else:
         return False
 
