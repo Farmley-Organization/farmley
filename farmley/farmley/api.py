@@ -200,6 +200,7 @@ def create_address(addressTitle, emailId, phone, addressLine1, city, state, pinc
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
                }
+    state = state.title()
 
     doc_dict = {
         "docstatus": 0,
