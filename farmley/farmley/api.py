@@ -448,7 +448,5 @@ def create_customer(customerName, phoneNumber, emailID=None):
     request_url = "http://dev-erp.farmley.com/api/method/frappe.client.save"
     create_customer_response = requests.post(url=request_url, headers=headers, data=json.dumps(payload))
     create_customer_json = json.loads(create_customer_response.content.decode('utf-8'))
-    if customerName == create_customer_json["message"]["name"]:
-        return True
     return create_customer_json
 
