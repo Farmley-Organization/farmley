@@ -194,8 +194,9 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
 
 
 @frappe.whitelist()
-def create_address(addressTitle, emailId, phone, addressLine1, city, state, pincode, customerName,addressType, addressLine2=None,
-                   county=None, gstNumber = None):
+def create_address(addressTitle, emailId, phone, addressLine1, city, state, pincode, customerName, addressType,
+                   addressLine2=None,
+                   county=None, gstNumber=None):
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
@@ -207,7 +208,7 @@ def create_address(addressTitle, emailId, phone, addressLine1, city, state, pinc
         "doctype": "Address",
         "address_type": addressType,
         "gstin": gstNumber,
-        "gst_state":state,
+        "gst_state": state,
         "links": [
             {
                 "docstatus": 0,
@@ -244,7 +245,7 @@ def create_address(addressTitle, emailId, phone, addressLine1, city, state, pinc
     if add_save_json['_server_messages'] == message:
         return True
     else:
-        return False,add_save_json
+        return False, add_save_json
 
 
 @frappe.whitelist()
@@ -276,38 +277,35 @@ def add_to_cart(payload, source, name):
 
 
 @frappe.whitelist()
-def save_order(name, customer, refrenceNumber,refrenceDate, grandTotal=None):
+def save_order(name, customer, refrenceNumber, refrenceDate, grandTotal=None):
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
-               "Accept": "apcustomerAddress, transactionDate, itemCode, itemName, deliveryDate, qty, rate,plication/json",
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
                }
     grandTotal = float(grandTotal)
 
-    # url = "http://localhost:8000/api/resource/Sales Order/{}".format(name)
     url = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
-    # url1 = "http://dev-erp.farmley.com/api/resource/Sales Order/{}".format(name)
 
     save_orders_response = requests.get(url=url, headers=headers)
     orders_data_json = json.loads(save_orders_response.content.decode('utf-8'))
     doc_dict = {
-            "docstatus": 0,
-            "doctype": "Payment Entry",
-            "name": "new-payment-entry-1",
-            "__islocal": 1,
-            "__unsaved": 1,
-            "naming_series": "ACC-PAY-.YYYY.-",
-            "payment_type": "Receive",
-            "payment_order_status": "Initiated",
-            "posting_date": refrenceDate,
-            "company": "Connedit Business Solutions Pvt. Ltd.",
-            "status": "Draft",
-            "custom_remarks": 0,
-            "letter_head": "Letter Head Farmley",
-            "party_type": "Customer",
-            "party": customer,
-            "paid_from": "14830 - Debtors - CBSPL",
-            "paid_from_account_balance": 0,
+        "docstatus": 0,
+        "doctype": "Payment Entry",
+        "name": "new-payment-entry-1",
+        "__islocal": 1,
+        "__unsaved": 1,
+        "naming_series": "ACC-PAY-.YYYY.-",
+        "payment_type": "Receive",
+        "payment_order_status": "Initiated",
+        "posting_date": refrenceDate,
+        "company": "Connedit Business Solutions Pvt. Ltd.",
+        "status": "Draft",
+        "custom_remarks": 0,
+        "letter_head": "Letter Head Farmley",
+        "party_type": "Customer",
+        "party": customer,
+        "paid_from": "14830 - Debtors - CBSPL",
+        "paid_from_account_balance": 0,
         "references": [
             {
                 "docstatus": 0,
@@ -327,7 +325,6 @@ def save_order(name, customer, refrenceNumber,refrenceDate, grandTotal=None):
                 "allocated_amount": grandTotal
             }
         ],
-        "customer_address": "Home-Billing-16",
         "customer_gstin": None,
         "paid_to": "14311 - YES BANK A/C 023581300000540 - CBSPL",
         "paid_to_account_balance": 0,
@@ -351,11 +348,11 @@ def save_order(name, customer, refrenceNumber,refrenceDate, grandTotal=None):
         "reference_no": refrenceNumber,
         "reference_date": refrenceDate
     }
-    payment_payload={ "doc": json.dumps(doc_dict),
-        "action": "Submit"}
+    payment_payload = {"doc": json.dumps(doc_dict),
+                       "action": "Submit"}
     url_payment_entry = "http://dev-erp.farmley.com/api/method/frappe.desk.form.save.savedocs"
 
-    if float(grandTotal) == orders_data_json["data"]["grand_total"]:
+    if grandTotal == orders_data_json["data"]["grand_total"]:
         payload = {
             "order_type": "Sales",
             "docstatus": 1
@@ -417,3 +414,41 @@ def orders(customer):
     for i in range(len(orders_list["data"])):
         order_details_list.append(cart_items(orders_list["data"][i]["name"]))
     return order_details_list
+
+
+@frappe.whitelist()
+def create_customer(customerName, phoneNumber, emailID=None):
+    headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
+               "Content-Type": "application/json",
+               "X-Frappe-CSRF-Token": frappe.generate_hash()
+               }
+    # filters = {"filters":"[['Customer','mobile_no','=',{}],['Customer','customer_group','=','Individual'],['Customer','territory','=','All Territories']]".format(phoneNumber)}
+    #
+    # customer_check_url = "http://dev-erp.farmley.com/api/resource/Customer"
+    # is_present_res = requests.get(url=customer_check_url, headers=headers, data=json.dumps(filters))
+    # is_present_json = json.loads(is_present_res.content.decode('utf-8'))
+
+    payload = {"doc":{
+        "docstatus": 0,
+        "doctype": "Customer",
+        "__islocal": 1,
+        "__unsaved": 1,
+        "customer_type": "Individual",
+        "gst_category": "Unregistered",
+        "export_type": "With Payment of Tax",
+        "customer_group": "Individual",
+        "territory": "All Territories",
+        "is_internal_customer": 0,
+        "__run_link_triggers": 1,
+        "customer_name": customerName,
+        "email_id": emailID,
+        "mobile_no": phoneNumber,
+    }}
+
+    request_url = "http://dev-erp.farmley.com/api/method/frappe.client.save"
+    create_customer_response = requests.post(url=request_url, headers=headers, data=json.dumps(payload))
+    create_customer_json = json.loads(create_customer_response.content.decode('utf-8'))
+    if customerName == create_customer_json["message"]["name"]:
+        return True
+    return create_customer_json
+
