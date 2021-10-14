@@ -418,7 +418,7 @@ def orders(customer):
 
 
 @frappe.whitelist()
-def create_customer(customerName, phoneNumber, emailID=None):
+def create_customer(customerName,customerGroup,customerType, phoneNumber, emailID=None):
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
@@ -434,10 +434,10 @@ def create_customer(customerName, phoneNumber, emailID=None):
         "doctype": "Customer",
         "__islocal": 1,
         "__unsaved": 1,
-        "customer_type": "Individual",
+        "customer_type": customerType,
         "gst_category": "Unregistered",
         "export_type": "With Payment of Tax",
-        "customer_group": "Individual",
+        "customer_group": customerGroup,
         "territory": "All Territories",
         "is_internal_customer": 0,
         "__run_link_triggers": 1,
@@ -450,4 +450,15 @@ def create_customer(customerName, phoneNumber, emailID=None):
     create_customer_response = requests.post(url=request_url, headers=headers, data=json.dumps(payload))
     create_customer_json = json.loads(create_customer_response.content.decode('utf-8'))
     return create_customer_json
+@frappe.whitelist()
+def get_customer(phoneNumber):
+    customer_details = frappe.db.get_all(doctype="Customer",
+                                              filters=[["Customer","customer_group","=","All Customer Groups"],["Customer","territory","=","All Territories"]],
+
+                                              fields=["`tabCustomer`.`name`","`tabCustomer`.`owner`","`tabCustomer`.`creation`","`tabCustomer`.`modified`","`tabCustomer`.`modified_by`","`tabCustomer`.`_user_tags`","`tabCustomer`.`_comments`","`tabCustomer`.`_assign`","`tabCustomer`.`_liked_by`","`tabCustomer`.`docstatus`","`tabCustomer`.`parent`","`tabCustomer`.`parenttype`","`tabCustomer`.`parentfield`","`tabCustomer`.`idx`","`tabCustomer`.`customer_group`","`tabCustomer`.`territory`","`tabCustomer`.`customer_name`","`tabCustomer`.`image`","`tabCustomer`.`customer_type`","`tabCustomer`.`disabled`"])
+
+
+
+    return customer_details
+
 
