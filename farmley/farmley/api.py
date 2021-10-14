@@ -155,7 +155,7 @@ def open_product_category():
 
 
 @frappe.whitelist()
-def customer_addresses(phoneNumber=None, emailId=None, name=None):
+def customer_addresses(phoneNumber=None, emailId=None, name=None, addressType= None):
     """
     param: phoneNumber,emailId,customerCode
     return:addresses
@@ -170,6 +170,7 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None):
         _and if "where" in sql_query else where) + "ta.phone = \'{}\'".format(phoneNumber)
     if name is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "ta.name = \'{}\'".format(
         name)
+    if addressType is not None: sql_query = sql_query + (_and if "where" in sql_query else where) + "ta.address_type = \'{}\'".format(addressType)
     if emailId is not None: sql_query = sql_query + (
         _and if "where" in sql_query else where) + "ta.email_id = \'{}\'".format(emailId)
 
