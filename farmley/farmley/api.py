@@ -461,4 +461,36 @@ def get_customer(phoneNumber):
 
     return customer_details
 
+@frappe.whitelist()
+def get_customer_address(name):
+    sql_query = """SELECT name, address_title, address_type, address_line1, address_line2, city, county, state, country, pincode, email_id, phone, gstin, gst_state, gst_state_number, locality
+FROM `_e493ace7fbe0ad61`.tabAddress
+WHERE name in (SELECT  parent
+FROM `_e493ace7fbe0ad61`.`tabDynamic Link`
+WHERE link_name = '{}');
+""".format(name)
+    customer_all_address = frappe.db.sql(sql_query)
+    customer_all_address_json = []
+    for row in customer_all_address:
+        d = collections.OrderedDict()
+        d['name'] = row[0]
+        d['address_title'] = row[1]
+        d['address_type'] = row[2]
+        d['address_line1'] = row[3]
+        d['address_line2'] = row[4]
+        d['city'] = row[5]
+        d['county'] = row[6]
+        d['state'] = row[7]
+        d['country'] = row[8]
+        d['pincode'] = row[9]
+        d['email_id'] = row[10]
+        d['phone'] = row[11]
+        d['gstin'] = row[12]
+        d['gst_state'] = row[13]
+        d['gst_state_number'] = row[14]
+        d['locality'] = row[15]
+        customer_all_address_json.append(d)
+    return customer_all_address_json
+
+
 
