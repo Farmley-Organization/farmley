@@ -197,7 +197,7 @@ def customer_addresses(phoneNumber=None, emailId=None, name=None, addressType= N
 @frappe.whitelist()
 def create_address(addressTitle, emailId, phone, addressLine1, city, state, pincode, customerName, addressType,
                    addressLine2=None,
-                   county=None, gstNumber=None):
+                   county=None, gstNumber=None, locality=None):
     headers = {"Authorization": "Token d3b8f9e29501501:67e95c1f9503c26",
                "Content-Type": "application/json",
                "X-Frappe-CSRF-Token": frappe.generate_hash()
@@ -231,7 +231,9 @@ def create_address(addressTitle, emailId, phone, addressLine1, city, state, pinc
         "city": city,
         "county": county,
         "state": state,
-        "pincode": pincode
+        "pincode": pincode,
+        "locality": locality
+
     }
 
     payload = {
