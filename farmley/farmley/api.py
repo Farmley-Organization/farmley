@@ -457,7 +457,8 @@ def get_customer(phoneNumber):
     customer_details = frappe.db.get_all(doctype="Customer",
                                               filters=[["Customer","mobile_no","=",phoneNumber]],
 
-                                              fields=["`tabCustomer`.`name`","`tabCustomer`.`owner`","`tabCustomer`.`creation`","`tabCustomer`.`modified`","`tabCustomer`.`modified_by`","`tabCustomer`.`_user_tags`","`tabCustomer`.`_comments`","`tabCustomer`.`_assign`","`tabCustomer`.`_liked_by`","`tabCustomer`.`docstatus`","`tabCustomer`.`parent`","`tabCustomer`.`parenttype`","`tabCustomer`.`parentfield`","`tabCustomer`.`idx`","`tabCustomer`.`customer_group`","`tabCustomer`.`territory`","`tabCustomer`.`customer_name`","`tabCustomer`.`image`","`tabCustomer`.`customer_type`","`tabCustomer`.`disabled`"])
+                                              fields=["`tabCustomer`.`name`","`tabCustomer`.`owner`","`tabCustomer`.`creation`","`tabCustomer`.`modified`","`tabCustomer`.`modified_by`","`tabCustomer`.`_user_tags`","`tabCustomer`.`_comments`","`tabCustomer`.`_assign`","`tabCustomer`.`_liked_by`","`tabCustomer`.`docstatus`","`tabCustomer`.`parent`","`tabCustomer`.`parenttype`","`tabCustomer`.`parentfield`","`tabCustomer`.`idx`","`tabCustomer`.`customer_group`","`tabCustomer`.`territory`","`tabCustomer`.`customer_name`","`tabCustomer`.`image`","`tabCustomer`.`customer_type`","`tabCustomer`.`disabled`"],
+                                                order_by= "`tabCustomer`.`modified` asc")
 
 
 
