@@ -494,7 +494,7 @@ WHERE link_name = '{}')
         d['gst_state_number'] = row[14]
         d['locality'] = row[15]
         customer_all_address_json.append(d)
-    return sql_query
+    return customer_all_address_json
 
 
 
