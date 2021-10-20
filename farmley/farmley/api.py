@@ -464,13 +464,13 @@ def get_customer(phoneNumber):
     return customer_details
 
 @frappe.whitelist()
-def get_customer_address(name,addressType = None):
+def get_customer_address(customerName,addressType = None):
     sql_query = """SELECT name, address_title, address_type, address_line1, address_line2, city, county, state, country, pincode, email_id, phone, gstin, gst_state, gst_state_number, locality
 FROM `_e493ace7fbe0ad61`.tabAddress
 WHERE name in (SELECT  parent
 FROM `_e493ace7fbe0ad61`.`tabDynamic Link`
 WHERE link_name = '{}')
-""".format(name)
+""".format(customerName)
     if addressType is not None:
         sql_query = sql_query + " and " + " address_type = '{}' ;".format(addressType)
     customer_all_address = frappe.db.sql(sql_query)
