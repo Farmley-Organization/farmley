@@ -479,20 +479,20 @@ WHERE link_name = '{}')
     for row in customer_all_address:
         d = collections.OrderedDict()
         d['name'] = row[0]
-        d['address_title'] = row[1]
-        d['address_type'] = row[2]
-        d['address_line1'] = row[3]
-        d['address_line2'] = row[4]
+        d['addressTitle'] = row[1]
+        d['addressType'] = row[2]
+        d['addressLine1'] = row[3]
+        d['addressLine2'] = row[4]
         d['city'] = row[5]
         d['county'] = row[6]
         d['state'] = row[7]
         d['country'] = row[8]
         d['pincode'] = row[9]
-        d['email_id'] = row[10]
+        d['emailId'] = row[10]
         d['phone'] = row[11]
         d['gstin'] = row[12]
-        d['gst_state'] = row[13]
-        d['gst_state_number'] = row[14]
+        d['gstState'] = row[13]
+        d['gstStateNumber'] = row[14]
         d['locality'] = row[15]
         customer_all_address_json.append(d)
     return customer_all_address_json
